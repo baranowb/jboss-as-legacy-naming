@@ -34,6 +34,8 @@
     <properties>
         <module.name>org.jboss.legacy.naming.eap5</module.name>
         <directory.dependencies>${project.build.directory}/dependencies</directory.dependencies>
+        <eap5.home>${env.EAP5_HOME}</eap5.home>
+        <version.jboss.legacy.as>5.2.0</version.jboss.legacy.as>
     </properties>
     <dependencies>
         <dependency>
@@ -130,6 +132,27 @@
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging-spi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.aop</groupId>
+            <artifactId>jboss-aop</artifactId>
+            <version>${version.jboss.legacy.as}</version>
+            <scope>system</scope>
+            <systemPath>${eap5.home}/lib/jboss-aop.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>trove</groupId>
+            <artifactId>trove</artifactId>
+            <version>${version.jboss.legacy.as}</version>
+            <scope>system</scope>
+            <systemPath>${eap5.home}/lib/trove.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-mdr</artifactId>
+            <version>${version.jboss.legacy.as}</version>
+            <scope>system</scope>
+            <systemPath>${eap5.home}/lib/jboss-mdr.jar</systemPath>
+        </dependency>
     </dependencies>
     <build>
         <!-- Maven will append the version to the finalName (which is the name
@@ -147,7 +170,7 @@
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
-                            <skip>false</skip>
+                            <skip>true</skip>
                             <rules>
                                 <bannedDependencies>
                                     <searchTransitive>true</searchTransitive>
