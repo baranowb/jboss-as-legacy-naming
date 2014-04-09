@@ -21,15 +21,15 @@
  */
 package org.jboss.legacy.jnp.connector.clustered;
 
-import org.jboss.legacy.jnp.server.NamingStoreAdapter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jboss.as.clustering.impl.CoreGroupCommunicationService;
 import org.jboss.as.naming.ServiceBasedNamingStore;
 import org.jboss.as.network.SocketBinding;
+import org.jboss.legacy.jnp.JNPLogger;
+import org.jboss.legacy.jnp.JNPMessages;
 import org.jboss.legacy.jnp.connector.JNPServerNamingConnectorService;
 import org.jboss.legacy.jnp.infinispan.InfinispanDistributedTreeManager;
 import org.jboss.legacy.jnp.infinispan.InfinispanHAPartition;
+import org.jboss.legacy.jnp.server.NamingStoreAdapter;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
@@ -83,27 +83,30 @@ public class HAConnectorService implements JNPServerNamingConnectorService<HACon
     @Override
     public void start(StartContext startContext) throws StartException {
         try {
+            final SocketBinding socketBinding = this.getBinding().getValue();
+            SocketBinding rmiSocketBinding = socketBinding;
+            
             if (this.getRmiBinding().getOptionalValue() != null) {
-                service = new HAConnectorLegacyService(new NamingStoreAdapter(namingStoreValue.getValue()), distributedTreeManager.getValue(),
-                        new InfinispanHAPartition(new InfinispanGroupCommunicationService(coreGroupCommunicationService.getValue())), this.getBinding().getValue().getAddress().getHostName(),
-                        this.getBinding().getValue().getAbsolutePort(), this.getRmiBinding().getValue().getAddress().getHostName(), this.getRmiBinding().getValue().getAbsolutePort());
-            } else {
-                service = new HAConnectorLegacyService(new NamingStoreAdapter(namingStoreValue.getValue()), distributedTreeManager.getValue(),
-                        new InfinispanHAPartition(new InfinispanGroupCommunicationService(coreGroupCommunicationService.getValue())), this.getBinding().getValue().getAddress().getHostName(),
-                        this.getBinding().getValue().getAbsolutePort());
+                rmiSocketBinding = this.getRmiBinding().getValue();
             }
+            JNPLogger.ROOT_LOGGER.startHAConnectorService(socketBinding.getName(), socketBinding.getAddress(),socketBinding.getAbsolutePort(), rmiSocketBinding.getName(),rmiSocketBinding.getAddress(),rmiSocketBinding.getAbsolutePort());
+            service = new HAConnectorLegacyService(new NamingStoreAdapter(namingStoreValue.getValue()), distributedTreeManager.getValue(),
+                    new InfinispanHAPartition(new InfinispanGroupCommunicationService(coreGroupCommunicationService.getValue())), socketBinding.getAddress().getHostName(),
+                    socketBinding.getAbsolutePort(), rmiSocketBinding.getAddress().getHostName(), rmiSocketBinding.getAbsolutePort());
+
             service.start();
         } catch (Exception e) {
-            throw new StartException(e);
+            throw JNPMessages.MESSAGES.failedToStartHAConnectorService(e);
         }
     }
 
     @Override
     public void stop(StopContext stopContext) {
+        JNPLogger.ROOT_LOGGER.stopHAConnectorService();
         try {
             this.service.stop();
         } catch (Exception ex) {
-            Logger.getLogger(HAConnectorService.class.getName()).log(Level.SEVERE, null, ex);
+            JNPLogger.ROOT_LOGGER.couldNotStopHAConnectorService(ex);
         }
     }
 }

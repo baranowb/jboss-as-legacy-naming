@@ -22,6 +22,7 @@
 package org.jboss.legacy.jnp.server;
 
 import static org.jboss.legacy.jnp.JNPSubsystemModel.LEGACY;
+
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 

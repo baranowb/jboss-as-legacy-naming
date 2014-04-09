@@ -21,8 +21,8 @@
  */
 package org.jboss.legacy.jnp.server.clustered;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jboss.legacy.jnp.JNPLogger;
+import org.jboss.legacy.jnp.JNPMessages;
 import org.jboss.legacy.jnp.connector.clustered.HAConnectorLegacyService;
 import org.jboss.legacy.jnp.server.JNPServer;
 import org.jboss.legacy.jnp.server.JNPServerService;
@@ -56,20 +56,22 @@ public class HAServerService implements JNPServerService {
 
     @Override
     public void start(StartContext startContext) throws StartException {
+        JNPLogger.ROOT_LOGGER.startHAJNPServer();
         try {
             service = new HAServerLegacyService(getHAConnectorLegacyService().getValue());
             service.start();
         } catch (Exception ex) {
-            throw new StartException(ex);
+            throw JNPMessages.MESSAGES.failedToStartHAJNPServerService(ex);
         }
     }
 
     @Override
     public void stop(StopContext context) {
+        JNPLogger.ROOT_LOGGER.stopHAJNPServer();
         try {
             service.stop();
         } catch (Exception ex) {
-            Logger.getLogger(HAServerService.class.getName()).log(Level.SEVERE, null, ex);
+            JNPLogger.ROOT_LOGGER.couldNotStopHAJNPServer(ex);
         }
     }
 }

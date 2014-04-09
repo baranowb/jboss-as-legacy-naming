@@ -41,9 +41,9 @@
  */
 package org.jboss.legacy.jnp.server.simple;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jboss.as.naming.ServiceBasedNamingStore;
+import org.jboss.legacy.jnp.JNPLogger;
+import org.jboss.legacy.jnp.JNPMessages;
 import org.jboss.legacy.jnp.server.JNPServer;
 import org.jboss.legacy.jnp.server.JNPServerService;
 import org.jboss.legacy.jnp.server.LegacyJNPServerService;
@@ -82,20 +82,22 @@ public class SingleServerService implements JNPServerService {
 
     @Override
     public void start(StartContext startContext) throws StartException {
+        JNPLogger.ROOT_LOGGER.startJNPServer();
         try {
             this.service = new SingleServerLegacyService(new NamingStoreAdapter(namingStoreValue.getValue()));
             this.service.start();
         } catch (Exception e) {
-            throw new StartException(e);
+            throw JNPMessages.MESSAGES.failedToStartJNPServerService(e);
         }
     }
 
     @Override
     public void stop(StopContext stopContext) {
+        JNPLogger.ROOT_LOGGER.stopJNPServer();
         try {
             this.service.stop();
         } catch (Exception ex) {
-            Logger.getLogger(SingleServerService.class.getName()).log(Level.SEVERE, null, ex);
+            JNPLogger.ROOT_LOGGER.couldNotStopJNPServer(ex);
         }
     }
 }
