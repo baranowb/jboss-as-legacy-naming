@@ -62,9 +62,10 @@ public class WatchfulContext implements Context {
     // private String name;
     private final Context wrappedContext;
 
-    public WatchfulContext(Context wrappedContext) throws NamingException {
+    public WatchfulContext(final Context wrappedContext, final ClassLoader deploymentClassLoader, final ClassLoader moduleClassLoader) throws NamingException {
         super();
         this.wrappedContext = wrappedContext;
+        this.classLoader = new WatchfulClassLoader(moduleClassLoader, deploymentClassLoader);
     }
 
     public Object lookup(Name name) throws NamingException {
@@ -367,23 +368,7 @@ public class WatchfulContext implements Context {
     }
 
     protected ClassLoader getWatchfulClassLoader() {
-
-        ClassLoader result = this.classLoader;
-        if (result == null) {
-            synchronized (this) {
-                result = this.classLoader;
-                if (result != null)
-                    return result;
-
-                // use module?
-                final ClassLoader eap5EnabledClassLoader = this.getClass().getClassLoader();
-                // deployment/invocation class loader, to load interface for Proxy
-                final ClassLoader invocationClassLoader = SecurityActions.getContextClassLoader();
-                this.classLoader = result = new WatchfulClassLoader(eap5EnabledClassLoader, invocationClassLoader);
-            }
-        }
-
-        return result;
+        return this.classLoader;
     }
 
     protected Object decorate(Object o, ClassLoader classLoader) {

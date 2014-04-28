@@ -28,6 +28,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
+import org.jboss.as.naming.ExternalContextObjectFactory;
 import org.jnp.interfaces.NamingContextFactory;
 
 /**
@@ -43,8 +44,17 @@ public class WatchfulContextFactory implements InitialContextFactory {
 
     @Override
     public Context getInitialContext(Hashtable<?, ?> environment) throws NamingException {
+        final ClassLoader deploymentClassLoader = (ClassLoader) environment.remove(ExternalContextObjectFactory.CLASSLOADER_DEPLOYMENT);
+        final ClassLoader mopduleClassLoader = (ClassLoader) environment.remove(ExternalContextObjectFactory.CLASSLOADER_MODULE);
+        if(deploymentClassLoader == null){
+            throw new IllegalArgumentException("ExternalContextObjectFactory.CLASSLOADER_DEPLOYMENT must not be null");
+        }
+        
+        if(mopduleClassLoader == null){
+            throw new IllegalArgumentException("ExternalContextObjectFactory.CLASSLOADER_MODULE must not be null");
+        }
         final Context toWrap = this.wrappedFactory.getInitialContext(environment);
-        final WatchfulContext toReturn = new WatchfulContext(toWrap);
+        final WatchfulContext toReturn = new WatchfulContext(toWrap,deploymentClassLoader,mopduleClassLoader);
         return toReturn;
     }
 
