@@ -188,7 +188,7 @@
             <id>ci</id>
             <activation>
                 <property>
-                    <name>jbossas.eap6.zip</name>
+                    <name>jbossas.eap.zip</name>
                 </property>
             </activation>
             <modules>
